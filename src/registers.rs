@@ -92,7 +92,7 @@ const OUTPUT_TIE_OFF_DIRECT_MANUAL_CONTROLS: u8 = 0x4F;
 
 /// Mapping of register names to their addresses.
 #[repr(u8)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Register {
     SoftwareReset = SOFTWARE_RESET,
 
@@ -107,24 +107,24 @@ pub enum Register {
     ClockControl2 = CLOCK_CONTROL_2,
     Gpio = GPIO,
     JackDetect1 = JACK_DETECT_1,
-    DacControl = DAC_CONTROL,
-    LeftDacVolume = LEFT_DAC_VOLUME,
-    RightDacVolume = RIGHT_DAC_VOLUME,
+    DACControl = DAC_CONTROL,
+    LeftDACVolume = LEFT_DAC_VOLUME,
+    RightDACVolume = RIGHT_DAC_VOLUME,
     JackDetect2 = JACK_DETECT_2,
-    AdcControl = ADC_CONTROL,
-    LeftAdcVolume = LEFT_ADC_VOLUME,
-    RightAdcVolume = RIGHT_ADC_VOLUME,
+    ADCControl = ADC_CONTROL,
+    LeftADCVolume = LEFT_ADC_VOLUME,
+    RightADCVolume = RIGHT_ADC_VOLUME,
 
     // Equalizer
-    Eq1HighCutoff = EQ1_HIGH_CUTOFF,
-    Eq2Peak1 = EQ2_PEAK_1,
-    Eq3Peak2 = EQ3_PEAK_2,
-    Eq4Peak3 = EQ4_PEAK_3,
-    Eq5LowCutoff = EQ5_LOW_CUTOFF,
+    EQ1HighCutoff = EQ1_HIGH_CUTOFF,
+    EQ2Peak1 = EQ2_PEAK_1,
+    EQ3Peak2 = EQ3_PEAK_2,
+    EQ4Peak3 = EQ4_PEAK_3,
+    EQ5LowCutoff = EQ5_LOW_CUTOFF,
 
     // DAC Limiter
-    DacLimiter1 = DAC_LIMITER_1,
-    DacLimiter2 = DAC_LIMITER_2,
+    DACLimiter1 = DAC_LIMITER_1,
+    DACLimiter2 = DAC_LIMITER_2,
 
     // Notch filter
     NotchFilter1 = NOTCH_FILTER_1,
@@ -133,9 +133,9 @@ pub enum Register {
     NotchFilter4 = NOTCH_FILTER_4,
 
     // ALC and Noise Gate Controls
-    AlcControl1 = ALC_CONTROL_1,
-    AlcControl2 = ALC_CONTROL_2,
-    AlcControl3 = ALC_CONTROL_3,
+    ALCControl1 = ALC_CONTROL_1,
+    ALCControl2 = ALC_CONTROL_2,
+    ALCControl3 = ALC_CONTROL_3,
     NoiseGate = NOISE_GATE,
 
     // Phase Locked Loop
@@ -145,22 +145,22 @@ pub enum Register {
     PllK3 = PLL_K_3,
 
     // Miscellaneous
-    Control3d = CONTROL_3D,
+    Control3D = CONTROL_3D,
     RightSpeakerSubmixer = RIGHT_SPEAKER_SUBMIXER,
     InputControl = INPUT_CONTROL,
-    LeftInputPgaGain = LEFT_INPUT_PGA_GAIN,
-    RightInputPgaGain = RIGHT_INPUT_PGA_GAIN,
-    LeftAdcBoost = LEFT_ADC_BOOST,
-    RightAdcBoost = RIGHT_ADC_BOOST,
+    LeftInputPGAGain = LEFT_INPUT_PGA_GAIN,
+    RightInputPGAGain = RIGHT_INPUT_PGA_GAIN,
+    LeftADCBoost = LEFT_ADC_BOOST,
+    RightADCBoost = RIGHT_ADC_BOOST,
     OutputControl = OUTPUT_CONTROL,
     LeftMixer = LEFT_MIXER,
     RightMixer = RIGHT_MIXER,
-    LhpVolume = LHP_VOLUME,
-    RhpVolume = RHP_VOLUME,
-    LspkoutVolume = LSPKOUT_VOLUME,
-    RspkoutVolume = RSPKOUT_VOLUME,
-    Aux2Mixer = AUX2_MIXER,
-    Aux1Mixer = AUX1_MIXER,
+    LHPVolume = LHP_VOLUME,
+    RHPVolume = RHP_VOLUME,
+    LSPKOutVolume = LSPKOUT_VOLUME,
+    RSPKOutVolume = RSPKOUT_VOLUME,
+    AUX2Mixer = AUX2_MIXER,
+    AUX1Mixer = AUX1_MIXER,
     PowerManagement4 = POWER_MANAGEMENT_4,
 
     // PCM Time Slot and ADCOUT Impedance Option Control
@@ -170,17 +170,17 @@ pub enum Register {
 
     // Silicon Revision and Device ID
     DeviceRevisionNumber = DEVICE_REVISION_NUMBER,
-    DeviceId = DEVICE_ID,
+    DeviceID = DEVICE_ID,
 
-    DacDither = DAC_DITHER,
-    AlcEnhancement1 = ALC_ENHANCEMENT_1,
-    AlcEnhancement2 = ALC_ENHANCEMENT_2,
+    DACDither = DAC_DITHER,
+    ALCEnhancement1 = ALC_ENHANCEMENT_1,
+    ALCEnhancement2 = ALC_ENHANCEMENT_2,
     MiscControls = MISC_CONTROLS,
     InputTieOffDirectManualControl = INPUT_TIE_OFF_DIRECT_MANUAL_CONTROL,
-    PowerReductionAndOutputTieOffDirectManualControl =
+    ReductionAndOutputTieOffDirectManualControl =
         POWER_REDUCTION_AND_OUTPUT_TIE_OFF_DIRECT_MANUAL_CONTROL,
-    AgcPeakToPeakReadout = AGC_PEAK_TO_PEAK_READOUT,
-    AgcPeakDetectorReadout = AGC_PEAK_DETECTOR_READOUT,
+    AGCPeakToPeakReadout = AGC_PEAK_TO_PEAK_READOUT,
+    AGCPeakDetectorReadout = AGC_PEAK_DETECTOR_READOUT,
     AutomuteControlAndStatusReadout = AUTOMUTE_CONTROL_AND_STATUS_READOUT,
     OutputTieOffDirectManualControls = OUTPUT_TIE_OFF_DIRECT_MANUAL_CONTROLS,
 }
@@ -551,7 +551,7 @@ bitfield! {
 
 impl HasAddress for DACControl {
     fn address(&self) -> Register {
-        Register::DacControl
+        Register::DACControl
     }
 }
 
@@ -581,7 +581,7 @@ impl Default for LeftDACVolume {
 
 impl HasAddress for LeftDACVolume {
     fn address(&self) -> Register {
-        Register::LeftDacVolume
+        Register::LeftDACVolume
     }
 }
 
@@ -611,7 +611,7 @@ impl Default for RightDACVolume {
 
 impl HasAddress for RightDACVolume {
     fn address(&self) -> Register {
-        Register::RightDacVolume
+        Register::RightDACVolume
     }
 }
 
@@ -677,7 +677,7 @@ impl Default for ADCControl {
 
 impl HasAddress for ADCControl {
     fn address(&self) -> Register {
-        Register::AdcControl
+        Register::ADCControl
     }
 }
 
@@ -707,7 +707,7 @@ impl Default for LeftADCVolume {
 
 impl HasAddress for LeftADCVolume {
     fn address(&self) -> Register {
-        Register::LeftAdcVolume
+        Register::LeftADCVolume
     }
 }
 
@@ -737,7 +737,7 @@ impl Default for RightADCVolume {
 
 impl HasAddress for RightADCVolume {
     fn address(&self) -> Register {
-        Register::RightAdcVolume
+        Register::RightADCVolume
     }
 }
 
@@ -772,7 +772,7 @@ impl Default for EQ1HighCutoff {
 
 impl HasAddress for EQ1HighCutoff {
     fn address(&self) -> Register {
-        Register::Eq1HighCutoff
+        Register::EQ1HighCutoff
     }
 }
 
@@ -805,7 +805,7 @@ impl Default for EQ2Peak1 {
 
 impl HasAddress for EQ2Peak1 {
     fn address(&self) -> Register {
-        Register::Eq2Peak1
+        Register::EQ2Peak1
     }
 }
 
@@ -840,7 +840,7 @@ impl Default for EQ3Peak2 {
 
 impl HasAddress for EQ3Peak2 {
     fn address(&self) -> Register {
-        Register::Eq3Peak2
+        Register::EQ3Peak2
     }
 }
 
@@ -875,7 +875,7 @@ impl Default for EQ4Peak3 {
 
 impl HasAddress for EQ4Peak3 {
     fn address(&self) -> Register {
-        Register::Eq4Peak3
+        Register::EQ4Peak3
     }
 }
 
@@ -906,7 +906,7 @@ impl Default for EQ5LowCutoff {
 
 impl HasAddress for EQ5LowCutoff {
     fn address(&self) -> Register {
-        Register::Eq5LowCutoff
+        Register::EQ5LowCutoff
     }
 }
 
@@ -957,7 +957,7 @@ impl Default for DACLimiter1 {
 
 impl HasAddress for DACLimiter1 {
     fn address(&self) -> Register {
-        Register::DacLimiter1
+        Register::DACLimiter1
     }
 }
 
@@ -986,7 +986,7 @@ bitfield! {
 
 impl HasAddress for DACLimiter2 {
     fn address(&self) -> Register {
-        Register::DacLimiter2
+        Register::DACLimiter2
     }
 }
 
@@ -1109,7 +1109,7 @@ impl Default for ALCControl1 {
 
 impl HasAddress for ALCControl1 {
     fn address(&self) -> Register {
-        Register::AlcControl1
+        Register::ALCControl1
     }
 }
 
@@ -1144,7 +1144,7 @@ impl Default for ALCControl2 {
 
 impl HasAddress for ALCControl2 {
     fn address(&self) -> Register {
-        Register::AlcControl2
+        Register::ALCControl2
     }
 }
 
@@ -1193,7 +1193,7 @@ impl Default for ALCControl3 {
 
 impl HasAddress for ALCControl3 {
     fn address(&self) -> Register {
-        Register::AlcControl3
+        Register::ALCControl3
     }
 }
 
@@ -1334,7 +1334,7 @@ bitfield! {
 
 impl HasAddress for Control3D {
     fn address(&self) -> Register {
-        Register::Control3d
+        Register::Control3D
     }
 }
 
@@ -1457,7 +1457,7 @@ impl Default for LeftInputPGAGain {
 
 impl HasAddress for LeftInputPGAGain {
     fn address(&self) -> Register {
-        Register::LeftInputPgaGain
+        Register::LeftInputPGAGain
     }
 }
 
@@ -1495,7 +1495,7 @@ impl Default for RightInputPGAGain {
 
 impl HasAddress for RightInputPGAGain {
     fn address(&self) -> Register {
-        Register::RightInputPgaGain
+        Register::RightInputPGAGain
     }
 }
 
@@ -1536,7 +1536,7 @@ impl Default for LeftADCBoost {
 
 impl HasAddress for LeftADCBoost {
     fn address(&self) -> Register {
-        Register::LeftAdcBoost
+        Register::LeftADCBoost
     }
 }
 
@@ -1577,7 +1577,7 @@ impl Default for RightADCBoost {
 
 impl HasAddress for RightADCBoost {
     fn address(&self) -> Register {
-        Register::RightAdcBoost
+        Register::RightADCBoost
     }
 }
 
@@ -1760,7 +1760,7 @@ impl Default for LHPVolume {
 
 impl HasAddress for LHPVolume {
     fn address(&self) -> Register {
-        Register::LhpVolume
+        Register::LHPVolume
     }
 }
 
@@ -1799,7 +1799,7 @@ impl Default for RHPVolume {
 
 impl HasAddress for RHPVolume {
     fn address(&self) -> Register {
-        Register::RhpVolume
+        Register::RHPVolume
     }
 }
 
@@ -1838,7 +1838,7 @@ impl Default for LSPKOutVolume {
 
 impl HasAddress for LSPKOutVolume {
     fn address(&self) -> Register {
-        Register::LspkoutVolume
+        Register::LSPKOutVolume
     }
 }
 
@@ -1877,7 +1877,7 @@ impl Default for RSPKOutVolume {
 
 impl HasAddress for RSPKOutVolume {
     fn address(&self) -> Register {
-        Register::RspkoutVolume
+        Register::RSPKOutVolume
     }
 }
 
@@ -1914,7 +1914,7 @@ impl Default for AUX2Mixer {
 
 impl HasAddress for AUX2Mixer {
     fn address(&self) -> Register {
-        Register::Aux2Mixer
+        Register::AUX2Mixer
     }
 }
 
@@ -1959,7 +1959,7 @@ impl Default for AUX1Mixer {
 
 impl HasAddress for AUX1Mixer {
     fn address(&self) -> Register {
-        Register::Aux1Mixer
+        Register::AUX1Mixer
     }
 }
 
@@ -2112,7 +2112,7 @@ bitfield! {
 
 impl HasAddress for DeviceID {
     fn address(&self) -> Register {
-        Register::DeviceId
+        Register::DeviceID
     }
 }
 
@@ -2139,7 +2139,7 @@ impl Default for DACDither {
 
 impl HasAddress for DACDither {
     fn address(&self) -> Register {
-        Register::DacDither
+        Register::DACDither
     }
 }
 
@@ -2165,7 +2165,7 @@ bitfield! {
 
 impl HasAddress for ALCEnhancement1 {
     fn address(&self) -> Register {
-        Register::AlcEnhancement1
+        Register::ALCEnhancement1
     }
 }
 
@@ -2183,7 +2183,7 @@ bitfield! {
 
 impl HasAddress for ALCEnhancement2 {
     fn address(&self) -> Register {
-        Register::AlcEnhancement2
+        Register::ALCEnhancement2
     }
 }
 
@@ -2321,7 +2321,7 @@ bitfield! {
 
 impl HasAddress for ReductionAndOutputTieOffDirectManualControl {
     fn address(&self) -> Register {
-        Register::PowerReductionAndOutputTieOffDirectManualControl
+        Register::ReductionAndOutputTieOffDirectManualControl
     }
 }
 
@@ -2336,7 +2336,7 @@ bitfield! {
 
 impl HasAddress for AGCPeakToPeakReadout {
     fn address(&self) -> Register {
-        Register::AgcPeakToPeakReadout
+        Register::AGCPeakToPeakReadout
     }
 }
 
@@ -2351,7 +2351,7 @@ bitfield! {
 
 impl HasAddress for AGCPeakDetectorReadout {
     fn address(&self) -> Register {
-        Register::AgcPeakDetectorReadout
+        Register::AGCPeakDetectorReadout
     }
 }
 

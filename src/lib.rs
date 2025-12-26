@@ -6,11 +6,13 @@ pub mod registers;
 
 pub const ADDRESS: SevenBitAddress = 0b0011010;
 
+/// Driver for the NAU88C22 audio codec.
 pub struct Nau88c22<I2C> {
     interface: I2C,
 }
 
 impl<I2C> Nau88c22<I2C> {
+    /// Constructs a new instance of the NAU88C22 audio codec driver.
     pub fn new(interface: I2C) -> Self {
         Self { interface }
     }

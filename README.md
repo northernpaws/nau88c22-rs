@@ -9,11 +9,15 @@ A Rust `embedded-hal-async` based driver for the [Nuvoton NAU88C22](https://www.
 ```rust
 use nau88c22_rs::Nau88c22;
 
-fn main () {
+async fn main () {
+    // Set up the I2C device based on your HAL.
     let i2c;
-    // set up the I2C device based on your HAL.
 
+    // Initialize the codec using the I2C device.
     let codec = Nau88c22yg::new(i2c);
+
+    // Software reset the codec to known default register values.
+    codec.reset().await.unwrap();
 }
 
 ```

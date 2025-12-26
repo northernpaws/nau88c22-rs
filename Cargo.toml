@@ -1,0 +1,12 @@
+[package]
+name = "nau88c22-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embedded-hal-async = "1.0.0"
+proc-bitfield = "0.5.2"
+
+[features]
+default = []
+std = []

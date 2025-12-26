@@ -2,6 +2,8 @@
 
 use proc_bitfield::bitfield;
 
+const SOFTWARE_RESET: u8 = 0x00;
+
 const POWER_MANAGEMENT_1: u8 = 0x01;
 const POWER_MANAGEMENT_2: u8 = 0x02;
 const POWER_MANAGEMENT_3: u8 = 0x03;
@@ -92,6 +94,8 @@ const OUTPUT_TIE_OFF_DIRECT_MANUAL_CONTROLS: u8 = 0x4F;
 #[repr(u8)]
 #[derive(Clone, Copy)]
 pub enum Register {
+    SoftwareReset = SOFTWARE_RESET,
+
     PowerManagement1 = POWER_MANAGEMENT_1,
     PowerManagement2 = POWER_MANAGEMENT_2,
     PowerManagement3 = POWER_MANAGEMENT_3,

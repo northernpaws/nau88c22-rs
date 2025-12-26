@@ -1,6 +1,6 @@
 # NAU88C22-rs
 
-A Rust embedded-hal driver for the [Nuvoton NAU88C22](https://www.nuvoton.com/products/smart-home-audio/audio-converters/audio-codec-series/nau88c22yg/) audio codec.
+A Rust `embedded-hal-async` based driver for the [Nuvoton NAU88C22](https://www.nuvoton.com/products/smart-home-audio/audio-converters/audio-codec-series/nau88c22yg/) audio codec.
 
 [**Data Sheet**](https://www.nuvoton.com/export/resource-files/en-us--DS_NAU88C22_DataSheet_EN_Rev2.2.pdf)
 

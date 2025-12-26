@@ -2,6 +2,8 @@
 
 use embedded_hal_async::i2c::SevenBitAddress;
 
+use crate::registers::Register;
+
 pub mod registers;
 
 pub const ADDRESS: SevenBitAddress = 0b0011010;
@@ -23,6 +25,12 @@ impl<I2C: embedded_hal_async::i2c::I2c> Nau88c22<I2C>
 where
     I2C: embedded_hal_async::i2c::I2c,
 {
+    /// Reset the audio codec.
+    pub async fn reset(&mut self) -> Result<(), I2C::Error> {
+        // Writing anything to register 0 triggers a reset.
+        self.write_register(Register::SoftwareReset, 0x1FF).await
+    }
+
     /// Reads the specified register.
     ///
     /// Register values are in the lower 9 bits of the `u16`.

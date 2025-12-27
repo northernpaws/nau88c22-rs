@@ -2,6 +2,9 @@
 name = "nau88c22-rs"
 version = "0.1.0"
 edition = "2024"
+description = "Rust driver for the nau88c22 audio codec."
+license = "MIT"
+repository = "https://github.com/northernpaws/nau88c22-rs"
 
 [dependencies]
 embedded-hal-async = "1.0.0"

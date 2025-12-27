@@ -1,6 +1,8 @@
 //! All of the registers defined for the nau88c22 codec.
 
-use proc_bitfield::bitfield;
+use core::default;
+
+use proc_bitfield::{ConvRaw, bitfield};
 
 const SOFTWARE_RESET: u8 = 0x00;
 
@@ -302,6 +304,36 @@ impl HasAddress for PowerManagement3 {
     }
 }
 
+/// Word length of audio data stream.
+///
+/// 24-bits default.
+#[derive(Default, ConvRaw)]
+pub enum WordLength {
+    /// 00 = 16-bit word length
+    Word16Bit = 0b00,
+    /// 01 = 20-bit word length
+    Word20Bit = 0b01,
+    /// 10 = 24-bit word length
+    #[default]
+    Word24Bit = 0b10,
+    /// 11 = 32-bit word length
+    Word32Bit = 0b11,
+}
+
+/// Audio interface data format (default setting is I2S).
+#[derive(Default, ConvRaw)]
+pub enum AudioInterfaceDataFormat {
+    /// 00 = right justified
+    RightJustified = 0b00,
+    /// 01 = left justified
+    LeftJustified = 0b01,
+    /// 10 = standard I2S format
+    #[default]
+    StandardI2S = 0b10,
+    /// 11 = PCMA or PCMB audio data format option
+    PCMAOrPCMB = 0b11,
+}
+
 bitfield! {
     pub struct AudioInterface(pub u16): FromStorage, IntoStorage {
         /// Bit clock phase inversion option for BCLK, pin#8
@@ -320,13 +352,13 @@ bitfield! {
         /// 01 = 20-bit word length
         /// 10 = 24-bit word length
         /// 11 = 32-bit word length
-        pub wlen: u8 @ 5..=6,
+        pub wlen: u8 [try WordLength] @ 5..=6,
         /// Audio interface data format (default setting is I2S)
         /// 00 = right justified
         /// 01 = left justified
         /// 10 = standard I2S format
         /// 11 = PCMA or PCMB audio data format option
-        pub aifmt: u8 @ 3..=4,
+        pub aifmt: u8 [try AudioInterfaceDataFormat] @ 3..=4,
         /// DAC audio data left-right ordering
         /// 0 = left DAC data in left phase of LRP
         /// 1 = left DAC data in right phase of LRP (left-right reversed)
@@ -354,6 +386,32 @@ impl HasAddress for AudioInterface {
     }
 }
 
+/// DAC companding mode control.
+#[derive(ConvRaw)]
+pub enum DACCompandingModeControl {
+    /// 00 = off (normal linear operation)
+    Off = 0b00,
+    /// 01 = reserved
+    Reserved = 0b01,
+    /// 10 = u-law companding
+    ULawCompanding = 0b10,
+    /// 11 = A-law companding
+    ALawCompanding = 0b11,
+}
+
+/// ADC companding mode control
+#[derive(ConvRaw)]
+pub enum ADCCompandingModeControl {
+    /// 00 = off (normal linear operation)
+    Off = 0b00,
+    /// 01 = reserved
+    Reserved = 0b01,
+    /// 10 = u-law companding
+    ULawCompanding = 0b10,
+    /// 11 = A-law companding
+    ALawCompanding = 0b11,
+}
+
 bitfield! {
     #[derive(Default)]
     pub struct Companding(pub u16): FromStorage, IntoStorage {
@@ -366,13 +424,13 @@ bitfield! {
         /// 01 = reserved
         /// 10 = u-law companding
         /// 11 = A-law companding
-        pub daccm: u8 @ 3..=4,
+        pub daccm: u8 [try DACCompandingModeControl] @ 3..=4,
         /// ADC companding mode control
         /// 00 = off (normal linear operation)
         /// 01 = reserved
         /// 10 = u-law companding
         /// 11 = A-law companding
-        pub adccm: u8 @ 1..=2,
+        pub adccm: u8 [try ADCCompandingModeControl] @ 1..=2,
         /// DAC audio data input option to route directly to ADC data stream
         /// 0 = no passthrough, normal operation
         /// 1 = ADC output data stream routed to DAC input data path
@@ -384,6 +442,49 @@ impl HasAddress for Companding {
     fn address(&self) -> Register {
         Register::Companding
     }
+}
+
+/// Scaling of master clock source for internal 256fs rate ( divide by 2 = default)
+#[derive(Default, ConvRaw)]
+pub enum MasterClockSourceScaling {
+    /// 000 = divide by 1
+    Divide1 = 0b000,
+    /// 001 = divide by 1.5
+    Divide1_5 = 0b001,
+    /// 010 = divide by 2
+    #[default]
+    Divide2 = 0b010,
+    /// 011 = divide by 3
+    Divide3 = 0b011,
+    /// 100 = divide by 4
+    Divide4 = 0b100,
+    /// 101 = divide by 6
+    Divide6 = 0b101,
+    /// 110 = divide by 8
+    Divide8 = 0b110,
+    /// 111 = divide by 12
+    Divide12 = 0b111,
+}
+
+/// Scaling of output frequency at BCLK pin#8 when chip is in master mode.
+#[derive(ConvRaw)]
+pub enum BCLKOutputFrequencyScaling {
+    /// 000 = divide by 1
+    Divide1 = 0b000,
+    /// 001 = divide by 2
+    Divide2 = 0b001,
+    /// 010 = divide by 4
+    Divide4 = 0b010,
+    /// 011 = divide by 8
+    Divide8 = 0b011,
+    /// 100 = divide by 16
+    Divide16 = 0b100,
+    /// 101 = divide by 32
+    Divide32 = 0b101,
+    /// 110 = reserved
+    Reserved1 = 0b110,
+    /// 111 = reserved
+    Reserved2 = 0b111,
 }
 
 bitfield! {
@@ -401,7 +502,7 @@ bitfield! {
         /// 101 = divide by 6
         /// 110 = divide by 8
         /// 111 = divide by 12
-        pub mclksel: u8 @ 5..=7,
+        pub mclksel: u8 [try MasterClockSourceScaling] @ 5..=7,
         /// Scaling of output frequency at BCLK pin#8 when chip is in master mode
         /// 000 = divide by 1
         /// 001 = divide by 2
@@ -411,7 +512,7 @@ bitfield! {
         /// 101 = divide by 32
         /// 110 = reserved
         /// 111 = reserved
-        pub bclksel: u8 @ 2..=4,
+        pub bclksel: u8 [try BCLKOutputFrequencyScaling] @ 2..=4,
         /// Enables chip master mode to drive FS and BCLK outputs
         /// 0 = FS and BCLK are inputs
         /// 1 = FS and BCLK are driven as outputs by internally generated clocks
@@ -429,6 +530,32 @@ impl HasAddress for ClockControl1 {
     fn address(&self) -> Register {
         Register::ClockControl1
     }
+}
+
+/// Audio data sample rate indication (48kHz default).
+///
+/// Sets up scaling for internal filter coefficients, but does not affect in
+/// any way the actual device sample rate. Should be set to value most closely
+/// matching the actual sample rate determined by 256fs internal node.
+#[derive(Default, ConvRaw)]
+pub enum AudioDataSampleRateIndication {
+    /// 000 = 48kHz
+    #[default]
+    SampleRate48 = 0b000,
+    /// 001 = 32kHz
+    SampleRate32 = 0b001,
+    /// 010 = 24kHz
+    SampleRate24 = 0b010,
+    /// 011 = 16kHz
+    SampleRate16 = 0b011,
+    /// 100 = 12kHz
+    SampleRate12 = 0b100,
+    /// 101 = 8kHz
+    SampleRate8 = 0b101,
+    /// 110 = reserved
+    Reserved1 = 0b110,
+    /// 111 = reserved
+    Reserved2 = 0b111,
 }
 
 bitfield! {
@@ -450,7 +577,7 @@ bitfield! {
         /// 101 = 8kHz
         /// 110 = reserved
         /// 111 = reserved
-        pub smplr: u8 @ 2..=4,
+        pub smplr: u8 [try AudioDataSampleRateIndication] @ 2..=4,
         /// Slow timer clock enable. Starts internal timer clock derived by dividing master clock.
         /// 0 = disabled
         /// 1 = enabled
@@ -464,6 +591,41 @@ impl HasAddress for ClockControl2 {
     }
 }
 
+/// Clock divisor applied to PLL clock for output from a GPIO pin
+#[derive(ConvRaw)]
+pub enum GPIO1PllDivisor {
+    /// 00 = divide by 1
+    Divide1 = 0b00,
+    /// 01 = divide by 2
+    Divide2 = 0b01,
+    /// 10 = divide by 3
+    Divide3 = 0b10,
+    /// 11 = divide by 4
+    Divide4 = 0b11,
+}
+
+/// CSB/GPIO1 function select (input default).
+#[derive(Default, ConvRaw)]
+pub enum GPIO1FunctionSelect {
+    /// 000 = use as input subject to MODE pin#18 input logic level
+    #[default]
+    MODePin18 = 0b000,
+    /// 001 = reserved
+    Reserved = 0b001,
+    /// 010 = Temperature OK status output ( logic 0 = thermal shutdown)
+    TemperatureOK = 0b010,
+    /// 011 = DAC automute condition (logic 1 = one or both DACs automuted)
+    DACAutomute = 0b011,
+    /// 100 = output divided PLL clock
+    DividedPLLClock = 0b100,
+    /// 101 = PLL locked condition (logic 1 = PLL locked)
+    PLLLocked = 0b101,
+    /// 110 = output set to logic 1 condition
+    Logic1 = 0b110,
+    /// 111 = output set to logic 0 condition
+    Logic2 = 0b111,
+}
+
 bitfield! {
     #[derive(Default)]
     pub struct Gpio(pub u16): FromStorage, IntoStorage {
@@ -472,7 +634,7 @@ bitfield! {
         /// 01 = divide by 2
         /// 10 = divide by 3
         /// 11 = divide by 4
-        pub gpio1pll: u8 @ 4..=5,
+        pub gpio1pll: u8 [try GPIO1PllDivisor] @ 4..=5,
         /// GPIO1 polarity inversion control
         /// 0 = normal logic sense of GPIO signal
         /// 1 = inverted logic sense of GPIO signal
@@ -486,7 +648,7 @@ bitfield! {
         /// 101 = PLL locked condition (logic 1 = PLL locked)
         /// 110 = output set to logic 1 condition
         /// 111 = output set to logic 0 condition
-        pub gpio1sel: u8 @ 0..=2,
+        pub gpio1sel: u8 [try GPIO1FunctionSelect] @ 0..=2,
     }
 }
 
@@ -494,6 +656,20 @@ impl HasAddress for Gpio {
     fn address(&self) -> Register {
         Register::Gpio
     }
+}
+
+/// Select jack detect pin (GPIO1 default)
+#[derive(Default, ConvRaw)]
+pub enum JackDetect {
+    /// 00 = GPIO1 is used for jack detection feature
+    #[default]
+    Gpio1 = 0b00,
+    /// 01 = GPIO2 is used for jack detection feature
+    Gpio2 = 0b01,
+    /// 10 = GPIO3 is used for jack detection feature
+    Gpio3 = 0b10,
+    /// 11 = reserved
+    Reserved = 0b11,
 }
 
 bitfield! {
@@ -513,7 +689,7 @@ bitfield! {
         /// 01 = GPIO2 is used for jack detection feature
         /// 10 = GPIO3 is used for jack detection feature
         /// 11 = reserved
-        pub jckdio: u8  @ 4..=5,
+        pub jckdio: u8 [try JackDetect] @ 4..=5,
     }
 }
 
@@ -741,6 +917,20 @@ impl HasAddress for RightADCVolume {
     }
 }
 
+/// Equalizer band 1 high pass -3dB cut-off frequency selection
+#[derive(Default, ConvRaw)]
+pub enum EqualizerBand1 {
+    /// 00 = 80Hz
+    Frequency80Hz = 0b00,
+    /// 01 = 105Hz (default)
+    #[default]
+    Frequency105Hz = 0b01,
+    /// 10 = 135Hz
+    Frequency135Hz = 0b10,
+    /// 11 = 175Hz
+    Frequency175Hz = 0b11,
+}
+
 bitfield! {
     pub struct EQ1HighCutoff(pub u16): FromStorage, IntoStorage {
         /// Equalizer and 3D audio processing block assignment.
@@ -752,7 +942,7 @@ bitfield! {
         /// 01 = 105Hz (default)
         /// 10 = 135Hz
         /// 11 = 175Hz
-        pub eq1cf: u8 @ 5..=6,
+        pub eq1cf: u8 [try EqualizerBand1] @ 5..=6,
         /// EQ Band 1 digital gain control. Expressed as a gain or attenuation in 1dB steps
         /// 01100 = 0.0dB default unity gain value
         /// 00000 = +12dB
@@ -776,6 +966,20 @@ impl HasAddress for EQ1HighCutoff {
     }
 }
 
+/// Equalizer band 2 center frequency selection.
+#[derive(Default, ConvRaw)]
+pub enum EqualizerBand2 {
+    /// 00 = 230Hz
+    Frequency230Hz = 0b00,
+    /// 01 = 300Hz (default)
+    #[default]
+    Frequency300Hz = 0b01,
+    /// 10 = 385Hz
+    Frequency385Hz = 0b10,
+    /// 11 = 500Hz
+    Frequency500Hz = 0b11,
+}
+
 bitfield! {
     pub struct EQ2Peak1(pub u16): FromStorage, IntoStorage {
         /// Equalizer Band 2 bandwidth selection
@@ -787,7 +991,7 @@ bitfield! {
         /// 01 = 300Hz (default)
         /// 10 = 385Hz
         /// 11 = 500Hz
-        pub eq2cf: u8 @ 5..=6,
+        pub eq2cf: u8 [try EqualizerBand2] @ 5..=6,
         /// EQ Band 2 digital gain control. Expressed as a gain or attenuation in 1dB steps
         /// 01100 = 0.0dB default unity gain value
         /// 00000 = +12dB
@@ -809,6 +1013,20 @@ impl HasAddress for EQ2Peak1 {
     }
 }
 
+/// Equalizer Band 3 center frequency selection
+#[derive(Default, ConvRaw)]
+pub enum EqualizerBand3Frequency {
+    /// 00 = 650Hz
+    Frequency650Hz = 0b00,
+    /// 01 = 850Hz (default)
+    #[default]
+    Frequency850Hz = 0b01,
+    /// 10 = 1.1kHz
+    Frequency1100Hz = 0b10,
+    /// 11 = 1.4kHz
+    Frequency1400Hz = 0b11,
+}
+
 bitfield! {
     pub struct EQ3Peak2(pub u16): FromStorage, IntoStorage {
         /// Equalizer Band 3 bandwidth selection
@@ -820,7 +1038,7 @@ bitfield! {
         /// 01 = 850Hz (default)
         /// 10 = 1.1kHz
         /// 11 = 1.4kHz
-        pub eq3cf: u8 @ 5..=6,
+        pub eq3cf: u8 [try EqualizerBand3Frequency] @ 5..=6,
         /// EQ Band 3 digital gain control. Expressed as a gain or attenuation in 1dB steps
         /// 01100 = 0.0dB default unity gain value
         /// 00000 = +12dB
@@ -844,6 +1062,20 @@ impl HasAddress for EQ3Peak2 {
     }
 }
 
+/// Equalizer Band 4 center frequency selection.
+#[derive(Default, ConvRaw)]
+pub enum EqualizerBand4Frequency {
+    /// 00 = 1.8kHz
+    Freqeuncy1_8kHz = 0b00,
+    /// 01 = 2.4kHz (default)
+    #[default]
+    Freqeuncy2_4kHz = 0b01,
+    /// 10 = 3.2kHz
+    Freqeuncy3_2kHz = 0b10,
+    /// 11 = 4.1kHz
+    Freqeuncy4_1kHz = 0b11,
+}
+
 bitfield! {
     pub struct EQ4Peak3(pub u16): FromStorage, IntoStorage {
         /// Equalizer Band 4 bandwidth selection
@@ -855,7 +1087,7 @@ bitfield! {
         /// 01 = 2.4kHz (default)
         /// 10 = 3.2kHz
         /// 11 = 4.1kHz
-        pub eq4cf: u8 @ 5..=6,
+        pub eq4cf: u8 [try EqualizerBand4Frequency] @ 5..=6,
         /// EQ Band 4 digital gain control. Expressed as a gain or attenuation in 1dB steps
         /// 01100 = 0.0dB default unity gain value
         /// 00000 = +12dB
@@ -879,6 +1111,20 @@ impl HasAddress for EQ4Peak3 {
     }
 }
 
+/// Equalizer Band 5 low pass -3dB cut-off frequency selection.
+#[derive(Default, ConvRaw)]
+pub enum EqualizerBand5Frequency {
+    /// 00 = 5.3kHz
+    Frequency5_3kHz = 0b00,
+    /// 01 = 6.9kHz (default)
+    #[default]
+    Frequency6_9kHz = 0b01,
+    /// 10 = 9.0kHz
+    Frequency9_0kHz = 0b10,
+    /// 11 = 11.7kHz
+    Frequency11_7kHz = 0b11,
+}
+
 bitfield! {
     pub struct EQ5LowCutoff(pub u16): FromStorage, IntoStorage {
         /// Equalizer Band 5 low pass -3dB cut-off frequency selection
@@ -886,7 +1132,7 @@ bitfield! {
         /// 01 = 6.9kHz (default)
         /// 10 = 9.0kHz
         /// 11 = 11.7kHz
-        pub eq5cf: u8 @ 5..=6,
+        pub eq5cf: u8 [try EqualizerBand5Frequency] @ 5..=6,
         /// EQ Band 5 digital gain control. Expressed as a gain or attenuation in 1dB steps
         /// 01100 = 0.0dB default unity gain value
         /// 00000 = +12dB
@@ -1070,6 +1316,19 @@ impl HasAddress for NotchFilter4 {
     }
 }
 
+/// Automatic Level Control function control bits.
+#[derive(ConvRaw)]
+pub enum AutomaticLevelControlFunction {
+    /// 00 = right and left ALCs disabled
+    RightAndLeftALCsDisabled = 0b00,
+    /// 01 = only right channel ALC enabled
+    RightChannelALCEnabled = 0b01,
+    /// 10 = only left channel ALC enabled
+    LeftChannelALCEnabled = 0b10,
+    /// 11 = both right and left channel ALCs enabled
+    LeftAndRightEnabled = 0b11,
+}
+
 bitfield! {
     pub struct ALCControl1(pub u16): FromStorage, IntoStorage {
         /// Automatic Level Control function control bits
@@ -1077,7 +1336,7 @@ bitfield! {
         /// 01 = only right channel ALC enabled
         /// 10 = only left channel ALC enabled
         /// 11 = both right and left channel ALCs enabled
-        pub alcen: u8 @ 7..=8,
+        pub alcen: u8 [try AutomaticLevelControlFunction] @ 7..=8,
         /// Set maximum gain limit for PGA volume setting changes under ALC control
         /// 111 = +35.25dB (default)
         /// 110 = +29.25dB
@@ -1197,6 +1456,28 @@ impl HasAddress for ALCControl3 {
     }
 }
 
+/// ALC noise gate threshold level
+#[derive(Default, ConvRaw)]
+pub enum ALCNoiseGateThresholdLevel {
+    /// 000 = -39dB (default)
+    #[default]
+    Threshold39dB = 0b000,
+    /// 001 = -45dB
+    Threshold45dB = 0b001,
+    /// 010 = -51dB
+    Threshold51dB = 0b010,
+    /// 011 = -57dB
+    Threshold57dB = 0b011,
+    /// 100 = -63dB
+    Threshold63dB = 0b100,
+    /// 101 = -69dB
+    Threshold69dB = 0b101,
+    /// 110 = -75dB
+    Threshold75dB = 0b110,
+    /// 111 = -81dB
+    Threshold81dB = 0b111,
+}
+
 bitfield! {
     pub struct NoiseGate(pub u16): FromStorage, IntoStorage {
         /// ALC noise gate function control bit
@@ -1212,7 +1493,7 @@ bitfield! {
         /// 101 = -69dB
         /// 110 = -75dB
         /// 111 = -81dB
-        pub alcnth: u8 @ 0..=2,
+        pub alcnth: u8 [try ALCNoiseGateThresholdLevel] @ 0..=2,
     }
 }
 

@@ -1805,7 +1805,7 @@ bitfield! {
         /// 101 = 0.0dB
         /// 110 = +3.0dB
         /// 111 = +6.0dB
-        pub lauxbstegain: u8 @ 0..=2,
+        pub lauxbstgain: u8 @ 0..=2,
     }
 }
 

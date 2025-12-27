@@ -6,6 +6,8 @@ The NAU88C22 audio codec includes drivers for speaker, headphone, differential a
 
 [**Data Sheet**](https://www.nuvoton.com/export/resource-files/en-us--DS_NAU88C22_DataSheet_EN_Rev2.2.pdf)
 
+[**docs.rs Link**](https://docs.rs/nau88c22-rs/0.1.0/nau88c22_rs/)
+
 # Example
 
 ```rust

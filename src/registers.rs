@@ -1795,7 +1795,7 @@ bitfield! {
         /// 101 = 0.0dB
         /// 110 = +3.0dB
         /// 111 = +6.0dB
-        pub lpgabstgaun: u8 @ 4..=6,
+        pub lpgabstgain: u8 @ 4..=6,
         /// Gain value between LAUXIN auxiliary input and LPGA Mix/Boost stage input
         /// 000 = path disconnected (default)
         /// 001 = -12dB

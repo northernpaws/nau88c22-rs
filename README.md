@@ -23,5 +23,8 @@ async fn main () {
     // Software reset the codec to known default register values.
     codec.reset().await.unwrap();
 }
-
 ```
+
+## License
+
+This crate is licensed under the MIT license.

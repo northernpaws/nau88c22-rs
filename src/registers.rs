@@ -2204,7 +2204,7 @@ bitfield! {
         /// AUXOUT1 output mute control
         /// 0 = output not muted, normal operation (default)
         /// 1 = output in muted condition
-        pub auxiut1mt: bool @ 6,
+        pub auxout1mt: bool @ 6,
         /// AUXOUT1 6dB attenuation enable
         /// 0 = output signal at normal gain value (default)
         /// 1 = output signal attenuated by 6.0dB

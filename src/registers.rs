@@ -228,7 +228,7 @@ bitfield! {
         /// 01 = 80kΩ nominal impedance at VREF pin
         /// 10 = 300kΩ nominal impedance at VREF pin
         /// 11 = 3kΩ nominal impedance at VREF pin
-        pub refimp: u8 @ 0..=2
+        pub refimp: u8 @ 0..=1
 
     }
 }

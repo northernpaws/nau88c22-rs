@@ -1,6 +1,6 @@
 [package]
 name = "nau88c22-rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "Rust driver for the nau88c22 audio codec."
 license = "MIT"

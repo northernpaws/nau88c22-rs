@@ -2175,7 +2175,7 @@ bitfield! {
         /// Left LADC Mix/Boost output LINMIX path control to AUX2 MIXER input
         /// 0 = path not connected
         /// 1 = path connected
-        pub ldacaux: bool @ 2,
+        pub ladcaux2: bool @ 2,
         /// Left LMAIN MIXER output to AUX2 MIXER input path control
         /// 0 = path not connected
         /// 1 = path connected

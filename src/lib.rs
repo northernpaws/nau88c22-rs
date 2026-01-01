@@ -1,5 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use core::fmt;
+
 use paste::paste;
 
 use embedded_hal_async::{
@@ -649,6 +651,12 @@ pub enum InitError<I2CError: i2c::Error> {
     AudioError(AudioError<I2CError>),
     /// Indicates there was an I2C error resetting the codec.
     I2CError(I2CError),
+}
+
+impl<I2CError: i2c::Error> fmt::Display for InitError<I2CError> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl<I2CError: i2c::Error> From<ClockError<I2CError>> for InitError<I2CError> {

@@ -659,6 +659,8 @@ impl<I2CError: i2c::Error> fmt::Display for InitError<I2CError> {
     }
 }
 
+impl<I2CError: i2c::Error> core::error::Error for InitError<I2CError> {}
+
 impl<I2CError: i2c::Error> From<ClockError<I2CError>> for InitError<I2CError> {
     fn from(value: ClockError<I2CError>) -> Self {
         Self::ClockError(value)

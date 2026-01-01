@@ -27,7 +27,7 @@ pub struct ClockParameters {
     pub pll_k3: u16,
 }
 
-/// Caluclates a suitable set of clock control parameters for the NAU88C22
+/// Calculates a suitable set of clock control parameters for the NAU88C22
 /// given the provided master block and sample rate inputs.
 ///
 ///  "IMCLK should not exceed 12.288MHz under any condition without enabling PLL49MOUT bit R72[2].

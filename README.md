@@ -31,15 +31,17 @@ codec.configure_pll(ClockConfig{
     // 
     // I.e., for 48kHz sample rate you'd, want a clock at or slightly under
     // 12.288MHz (codec can't handle higher without audio quality issues).
-    mclk: 2_884_000,
+    mclk: 2_884_000, // hz
 
     // Desired sample rate.
     //
     // Note that if you can't exactly match the sample rate on your digital audio
     // output, set this to the actual skewed sample rate to avoid sound glitches.
-    sample_rate: 48000,
-}).await?;
+    sample_rate: 48_000, // hz
+}, delay).await?;
 ```
+
+Or all at once along with an audio config using `codec.initialize(...)`.
 
 ## Example
 

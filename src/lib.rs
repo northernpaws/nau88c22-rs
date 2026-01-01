@@ -422,7 +422,27 @@ where
 
         // Configure the digital audio clock and internal PLL.
         if let Some(clock) = config.clock {
-            self.configure_pll(clock, &mut delay).await?;
+            // PLL is only required if the master frequency doesn't match
+            // the required frequency for the desired sample rate.
+            if (clock.sample_rate * 256.0) != clock.mclk {
+                self.configure_pll(clock, &mut delay).await?;
+            } else {
+                // Ensure PLL is disabled if not required.
+                self.modify_powermanagement1(|reg| {
+                    reg.with_pllen(false) // Ensure the PLL is disabled.
+                })
+                .await?;
+
+                // Register 6
+                //
+                // Set MCLK (pin#11) as a master clock input instead of PLL.
+                self.modify_clockcontrol1(|reg| {
+                    reg.with_clkm(false) // Internal PLL is disabled
+                        .with_mclksel(MasterClockSourceScaling::Divide1) // divide PLL before MCLK
+                        .with_clkioen(false) // fs and bclk are inputs
+                })
+                .await?;
+            }
         }
 
         Ok(())
@@ -657,14 +677,12 @@ where
 
         // Register 6
         //
-        // Set MCLK (pin#11) as a master clock input, configure
+        // Set PLL as a internal master clock input, configure
         // the clock pins (BCLK and FS) in slave mode, and set
         // the desired MCLK divider.
         self.modify_clockcontrol1(|reg| {
             reg.with_clkm(true) // Internal PLL is used
                 .with_mclksel(mclk_div)
-                // TODO: use mclk_div if required
-                .with_mclksel(MasterClockSourceScaling::Divide1) // divide PLL before MCLK
                 .with_clkioen(false) // fs and bclk are inputs
         })
         .await?;

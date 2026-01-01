@@ -752,6 +752,10 @@ where
 
     /// Convenince method that configures the
     /// audio chain based on a supplied config.
+    ///
+    /// Note that this does not disable or reset
+    /// any unconfigured registers, so it should
+    /// only be called after a reset().
     pub async fn configure_audio(
         &mut self,
         config: AudioConfig,

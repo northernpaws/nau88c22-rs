@@ -666,6 +666,25 @@ where
         })
         .await?;
 
+        // PLL is only required if the master frequency doesn't match
+        // the required frequency for the desired sample rate.
+        //
+        // Short-circuit early if the PLL is not required, and ensure
+        // that the external clock input is used instead.
+        if (config.sample_rate * 256.0) == config.mclk {
+            // Register 6
+            //
+            // Set MCLK (pin#11) as a master clock input instead of PLL.
+            self.modify_clockcontrol1(|reg| {
+                reg.with_clkm(false) // Internal PLL is disabled
+                    .with_mclksel(MasterClockSourceScaling::Divide1) // divide PLL before MCLK
+                    .with_clkioen(false) // fs and bclk are inputs
+            })
+            .await?;
+
+            return Ok(());
+        }
+
         // Calculate the codec master clock divisor and PLL for the
         // provided input clock frequency and desired sample rate.
         let clock = clock::calculate_pll(config.mclk, config.sample_rate).unwrap();

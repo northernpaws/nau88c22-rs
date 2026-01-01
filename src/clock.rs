@@ -1,3 +1,5 @@
+use core::fmt::Display;
+
 /// Shortcut of the known mclk divisors for the codec.
 const NAU_MCLKSEL: [f32; 8] = [1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0];
 
@@ -10,6 +12,12 @@ pub enum CodecClockError {
     MCLKTooHigh,
     MCLKTooLow,
     UnresolvablePLL,
+}
+
+impl Display for CodecClockError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        todo!()
+    }
 }
 
 pub struct ClockParameters {

@@ -228,6 +228,7 @@ where
 /// differential or single-ended mic input and line-in.
 ///
 /// Note that the AUX inputs bypass the PGA.
+#[derive(Debug)]
 pub struct PGAConfig {
     /// Specifies if the input PGA should be muted.
     pub muted: bool,
@@ -252,6 +253,7 @@ impl Default for PGAConfig {
 }
 
 /// Configures the left or right ADC input mixer.
+#[derive(Debug)]
 pub struct InputMixerConfig {
     /// Optionally enables and configures the
     /// PGA associated with the input mixer.
@@ -263,6 +265,7 @@ pub struct InputMixerConfig {
 }
 
 /// Configures the left or right ADC.
+#[derive(Debug)]
 pub struct ADCChannelConfig {
     /// Gain applied the ADC input from the mix/boost stage.
     pub gain: u8,
@@ -276,6 +279,7 @@ impl Default for ADCChannelConfig {
     }
 }
 
+#[derive(Debug)]
 pub struct ADCConfig {
     /// Enables x128 oversampling instead of the
     /// default x64 at a modest power increase.
@@ -298,6 +302,7 @@ impl Default for ADCConfig {
 }
 
 /// Configures the audio format used by the ADCs and DACs.
+#[derive(Debug)]
 pub struct AudioFormat {
     /// Sets the digital audio word length.
     pub word_length: WordLength,
@@ -315,8 +320,11 @@ impl Default for AudioFormat {
 }
 
 /// Configures the left or right DAC channel.
+#[derive(Debug)]
 pub struct DACChannelConfig {
     /// Sets the gain reduction for the DAC.
+    ///
+    /// 0b11111111 is 0dB
     pub gain: u8,
 }
 
@@ -328,6 +336,7 @@ impl Default for DACChannelConfig {
     }
 }
 
+#[derive(Debug)]
 pub struct DACConfig {
     /// Enables x128 oversampling instead of the
     /// default x64 at a modest power increase.
@@ -350,6 +359,7 @@ impl Default for DACConfig {
 }
 
 /// Configures the right output mixer.
+#[derive(Debug)]
 pub struct RightOutputMixerConfig {
     pub aux_gain: u8,
     pub aux_input: bool,
@@ -371,6 +381,7 @@ impl Default for RightOutputMixerConfig {
 }
 
 /// Configures the left output mixer.
+#[derive(Debug)]
 pub struct LeftOutputMixerConfig {
     pub aux_gain: u8,
     pub aux_input: bool,
@@ -395,6 +406,7 @@ impl Default for LeftOutputMixerConfig {
 ///
 /// Note that for audio output, use AUX1 for right channel
 /// because AUX2 doens't have a right channel mixer.
+#[derive(Debug)]
 pub struct Aux1OutputConfig {
     /// AUXOUT1 output mute control.
     pub muted: bool,
@@ -415,6 +427,7 @@ pub struct Aux1OutputConfig {
 /// Configures the aux2 output mixer.
 ///
 /// Note that for audio output, use AUX2 for left channel.
+#[derive(Debug)]
 pub struct Aux2OutputConfig {
     /// AUXOUT2 output mute control.
     pub muted: bool,
@@ -428,6 +441,7 @@ pub struct Aux2OutputConfig {
     pub left_dac_input: bool,
 }
 
+#[derive(Debug)]
 pub struct AudioConfig {
     /// Enables the AUX1 output mixer.
     ///
@@ -578,6 +592,7 @@ impl Default for AudioConfig {
     }
 }
 
+#[derive(Debug)]
 pub struct ClockConfig {
     /// The input master clock frequency
     /// in hertz applied to the MCLK pin.
@@ -591,6 +606,7 @@ pub struct ClockConfig {
 ///
 /// Ideally should be used once when program starts, but could
 /// be called multiple times without any downsides.
+#[derive(Debug)]
 pub struct InitializationConfig {
     pub audio: AudioConfig,
 
@@ -599,6 +615,7 @@ pub struct InitializationConfig {
 }
 
 /// Returned if there was an error configuring the clocks.
+#[derive(Debug)]
 pub enum ClockError<I2CError: i2c::Error> {
     PLLError(clock::CodecClockError),
     MCLKDividerInvalid,
@@ -612,6 +629,7 @@ impl<I2CError: i2c::Error> From<I2CError> for ClockError<I2CError> {
 }
 
 /// Returned if there was an error configuring the audio paths.
+#[derive(Debug)]
 pub enum AudioError<I2CError: i2c::Error> {
     I2CError(I2CError),
 }
@@ -623,6 +641,7 @@ impl<I2CError: i2c::Error> From<I2CError> for AudioError<I2CError> {
 }
 
 /// Returned if there was an error initializing the codec.
+#[derive(Debug)]
 pub enum InitError<I2CError: i2c::Error> {
     /// Indicates there was an error configuring the clocks.
     ClockError(ClockError<I2CError>),

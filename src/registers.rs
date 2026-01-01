@@ -307,7 +307,7 @@ impl HasAddress for PowerManagement3 {
 /// Word length of audio data stream.
 ///
 /// 24-bits default.
-#[derive(Default, ConvRaw)]
+#[derive(Debug, Default, ConvRaw)]
 pub enum WordLength {
     /// 00 = 16-bit word length
     Word16Bit = 0b00,
@@ -321,7 +321,7 @@ pub enum WordLength {
 }
 
 /// Audio interface data format (default setting is I2S).
-#[derive(Default, ConvRaw)]
+#[derive(Debug, Default, ConvRaw)]
 pub enum AudioInterfaceDataFormat {
     /// 00 = right justified
     RightJustified = 0b00,

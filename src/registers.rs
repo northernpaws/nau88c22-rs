@@ -1675,7 +1675,7 @@ bitfield! {
         /// RMICP right microphone positive input to right PGA positive input enable
         /// 0 = RMICP not connected to PGA positive input (default)
         /// 1 = RMICP connected to PGA positive input
-        pub rmicrrpga: bool @ 4,
+        pub rmicprpga: bool @ 4,
         /// LLIN right line input path control to left PGA positive input
         /// 0 = LLIN not connected to PGA positive input (default)
         /// 1 = LLIN connected to PGA positive input
@@ -1687,7 +1687,7 @@ bitfield! {
         /// LMICP left microphone positive input to left PGA positive input enable
         /// 0 = LMICP not connected to PGA positive input (default)
         /// 1 = LMICP connected to PGA positive input
-        pub lmicpgpga: bool @ 0,
+        pub lmicplpga: bool @ 0,
 
     }
 }

@@ -231,6 +231,24 @@ where
 pub struct PGAConfig {
     /// Specifies if the input PGA should be muted.
     pub muted: bool,
+
+    /// Connects mic positive input to PGA.
+    pub mic_n: bool,
+    /// Connects mic negative input to PGA.
+    pub mic_p: bool,
+    /// Connects the line-input to the PGA.
+    pub line_in: bool,
+}
+
+impl Default for PGAConfig {
+    fn default() -> Self {
+        Self {
+            muted: false,
+            mic_n: false,
+            mic_p: false,
+            line_in: false,
+        }
+    }
 }
 
 /// Configures the left or right ADC input mixer.
@@ -241,13 +259,21 @@ pub struct InputMixerConfig {
 
     // Apply a +20dB gain boost to the PGA input.
     pub pga_boost: bool,
-    pub pga_gain: u8, // TODO: use gain type
+    pub pga_gain: u8, // TODO: use gain type?
 }
 
 /// Configures the left or right ADC.
 pub struct ADCChannelConfig {
     /// Gain applied the ADC input from the mix/boost stage.
     pub gain: u8,
+}
+
+impl Default for ADCChannelConfig {
+    fn default() -> Self {
+        Self {
+            gain: 0b11111111, // 0.0dB attenuation (no attenuation)
+        }
+    }
 }
 
 pub struct ADCConfig {
@@ -261,12 +287,159 @@ pub struct ADCConfig {
     pub adc_right: Option<ADCChannelConfig>,
 }
 
+impl Default for ADCConfig {
+    fn default() -> Self {
+        Self {
+            oversample_128: false,
+            adc_left: None,
+            adc_right: None,
+        }
+    }
+}
+
+/// Configures the audio format used by the ADCs and DACs.
+pub struct AudioFormat {
+    /// Sets the digital audio word length.
+    pub word_length: WordLength,
+    /// Sets the digital audio format.
+    pub data_format: AudioInterfaceDataFormat,
+}
+
+impl Default for AudioFormat {
+    fn default() -> Self {
+        Self {
+            word_length: WordLength::Word24Bit,
+            data_format: AudioInterfaceDataFormat::StandardI2S,
+        }
+    }
+}
+
+/// Configures the left or right DAC channel.
+pub struct DACChannelConfig {
+    /// Sets the gain reduction for the DAC.
+    pub gain: u8,
+}
+
+impl Default for DACChannelConfig {
+    fn default() -> Self {
+        Self {
+            gain: 0b11111111, // 0dB
+        }
+    }
+}
+
+pub struct DACConfig {
+    /// Enables x128 oversampling instead of the
+    /// default x64 at a modest power increase.
+    pub oversample_128: bool,
+
+    /// Configures the left DAC.
+    pub dac_left: Option<DACChannelConfig>,
+    /// Configures the right DAC.
+    pub dac_right: Option<DACChannelConfig>,
+}
+
+impl Default for DACConfig {
+    fn default() -> Self {
+        Self {
+            oversample_128: false,
+            dac_left: None,
+            dac_right: None,
+        }
+    }
+}
+
+/// Configures the right output mixer.
+pub struct RightOutputMixerConfig {
+    pub aux_gain: u8,
+    pub aux_input: bool,
+    pub adc_input_gain: u8,
+    pub adc_input: bool,
+    pub dac_input: bool,
+}
+
+impl Default for RightOutputMixerConfig {
+    fn default() -> Self {
+        Self {
+            aux_gain: 0, // -15dB
+            aux_input: false,
+            adc_input_gain: 0, // -15dB
+            adc_input: false,
+            dac_input: false,
+        }
+    }
+}
+
+/// Configures the left output mixer.
+pub struct LeftOutputMixerConfig {
+    pub aux_gain: u8,
+    pub aux_input: bool,
+    pub adc_input_gain: u8,
+    pub adc_input: bool,
+    pub dac_input: bool,
+}
+
+impl Default for LeftOutputMixerConfig {
+    fn default() -> Self {
+        Self {
+            aux_gain: 0, // -15dB
+            aux_input: false,
+            adc_input_gain: 0, // -15dB
+            adc_input: false,
+            dac_input: false,
+        }
+    }
+}
+
+/// Configures the aux1 output mixer.
+///
+/// Note that for audio output, use AUX1 for right channel
+/// because AUX2 doens't have a right channel mixer.
+pub struct Aux1OutputConfig {
+    /// AUXOUT1 output mute control.
+    pub muted: bool,
+    /// AUXOUT1 6dB attenuation enable.
+    pub attenuation_6_0db: bool,
+    /// Left LMAIN MIXER output to AUX1 MIXER input path control.
+    pub left_mixer_input: bool,
+    /// Left DAC output to AUX1 MIXER input path control.
+    pub left_dac_input: bool,
+    /// Right RADC Mix/Boost output RINMIX path control to AUX1 MIXER input.
+    pub right_adc_mixer_input: bool,
+    /// Right RMIX output to AUX1 MIXER input path control.
+    pub right_mixer_input: bool,
+    /// Right DAC output to AUX1 MIXER input path control.
+    pub right_dac_input: bool,
+}
+
+/// Configures the aux2 output mixer.
+///
+/// Note that for audio output, use AUX2 for left channel.
+pub struct Aux2OutputConfig {
+    /// AUXOUT2 output mute control.
+    pub muted: bool,
+    /// AUX1 Mixer output to AUX2 MIXER input path control.
+    pub aux1_interconnect_input: bool,
+    /// Left LADC Mix/Boost output LINMIX path control to AUX2 MIXER input.
+    pub left_adc_mix_input: bool,
+    /// Left LMAIN MIXER output to AUX2 MIXER input path control.
+    pub left_mixer_input: bool,
+    /// Left DAC output to AUX2 MIXER input path control.
+    pub left_dac_input: bool,
+}
+
 pub struct AudioConfig {
     /// Enables the AUX1 output mixer.
-    pub enable_aux1_output: bool,
+    ///
+    /// Note that these are configured seperate from other outputs
+    /// because they have sets of independent mixers from the main.
+    pub aux1_output: Option<Aux1OutputConfig>,
 
     /// Enables the AUX2 output mixer.
-    pub enable_aux2_output: bool,
+    ///
+    /// Note that these are configured seperate from other outputs
+    /// because they have sets of independent mixers from the main.
+    pub aux2_output: Option<Aux2OutputConfig>,
 
     /// Enables the micbias power regulator.
     ///
@@ -302,8 +475,107 @@ pub struct AudioConfig {
     /// independently via their output mixer bypass path.
     pub input_mixer_left: Option<InputMixerConfig>,
 
-    /// Enables and configures the left and right ADC.
+    /// Enables and configures the right output mixer.
+    pub output_mixer_right: Option<RightOutputMixerConfig>,
+
+    /// Enables and configures the left output mixer.
+    pub output_mixer_left: Option<LeftOutputMixerConfig>,
+
+    /// Enables and configures the left and right ADCs.
     pub adc: Option<ADCConfig>,
+
+    /// Enables and configures the left and right DACs.
+    pub dac: Option<DACConfig>,
+
+    /// Configures the digital audio format for the ADCs and DACs.
+    pub format: AudioFormat,
+}
+
+impl AudioConfig {
+    /// Constructs an audio config configured for using the AUX left and
+    /// right inputs as ADC inputs, and the AUX1/2 outputs as DAC outputs.
+    pub const fn aux_in_aux_out(format: AudioFormat) -> Self {
+        AudioConfig {
+            aux1_output: Some(Aux1OutputConfig {
+                muted: false,
+                attenuation_6_0db: false,
+                left_mixer_input: false,
+                left_dac_input: false,
+                right_adc_mixer_input: false,
+                right_mixer_input: false,
+                right_dac_input: true,
+            }),
+            aux2_output: Some(Aux2OutputConfig {
+                muted: false,
+                aux1_interconnect_input: false,
+                left_adc_mix_input: false,
+                left_mixer_input: false,
+                left_dac_input: true,
+            }),
+
+            enable_micbias: false,
+
+            enable_headphone_right: false,
+            enable_headphone_left: false,
+
+            input_mixer_right: Some(InputMixerConfig {
+                pga: None, // aux inputs bypass the PGA
+                pga_boost: false,
+                pga_gain: 0,
+            }),
+            input_mixer_left: Some(InputMixerConfig {
+                pga: None, // aux inputs bypass the PGA
+                pga_boost: false,
+                pga_gain: 0,
+            }),
+
+            // Output mixers are disabled as we'll just pass the
+            // DAC output into the AUX output mixers directly.
+            output_mixer_right: None,
+            output_mixer_left: None,
+
+            adc: Some(ADCConfig {
+                oversample_128: false,
+                adc_left: Some(ADCChannelConfig {
+                    gain: 0b11111111, // 0dB - no attenuation
+                }),
+                adc_right: Some(ADCChannelConfig {
+                    gain: 0b11111111, // 0dB - no attenuation
+                }),
+            }),
+
+            dac: Some(DACConfig {
+                oversample_128: false,
+                dac_left: Some(DACChannelConfig {
+                    gain: 0b11111111, // 0dB - no attenuation
+                }),
+                dac_right: Some(DACChannelConfig {
+                    gain: 0b11111111, // 0dB - no attenuation
+                }),
+            }),
+
+            format: format,
+        }
+    }
+}
+
+impl Default for AudioConfig {
+    fn default() -> Self {
+        Self {
+            aux1_output: None,
+            aux2_output: None,
+            enable_micbias: false,
+            enable_headphone_right: false,
+            enable_headphone_left: false,
+            input_mixer_right: None,
+            input_mixer_left: None,
+            output_mixer_right: None,
+            output_mixer_left: None,
+            adc: None,
+            dac: None,
+            format: Default::default(),
+        }
+    }
 }
 
 pub struct ClockConfig {
@@ -390,14 +662,14 @@ where
         mut delay: DELAY,
     ) -> Result<(), InitError<I2C::Error>> {
         // Software reset the codec to a known state.
-        self.reset().await.unwrap(); // register 0
+        self.reset().await?; // register 0
 
         // Give time for the reset to finish.
         loop {
             delay.delay_ms(25).await;
 
             // Check that the device has finished reset and is responsive.
-            let device_id = self.read_deviceid().await.unwrap();
+            let device_id = self.read_deviceid().await?;
             if device_id.id() == 26 {
                 break;
             }
@@ -435,7 +707,8 @@ where
 
                 // Register 6
                 //
-                // Set MCLK (pin#11) as a master clock input instead of PLL.
+                // Set MCLK (pin#11) as a master clock input instead of
+                // the internal PLL, and disable the input clock divider.
                 self.modify_clockcontrol1(|reg| {
                     reg.with_clkm(false) // Internal PLL is disabled
                         .with_mclksel(MasterClockSourceScaling::Divide1) // divide PLL before MCLK
@@ -454,10 +727,10 @@ where
         &mut self,
         config: AudioConfig,
     ) -> Result<(), AudioError<I2C::Error>> {
-        // Then, enable the outputs after the charging delay.
+        // Enable the aux output mixers and mic biasing.
         self.modify_powermanagement1(|reg| {
-            reg.with_aux1mxen(config.enable_aux1_output) // Enable the aux 1&2 output mixers.
-                .with_aux2mxen(config.enable_aux2_output)
+            reg.with_aux1mxen(config.aux1_output.is_some()) // Enable the aux 1&2 output mixers.
+                .with_aux2mxen(config.aux2_output.is_some())
                 .with_micbiasen(config.enable_micbias) // Enable the micbias buffer output.
         })
         .await?;
@@ -519,19 +792,9 @@ where
                 // Configure the left input ADC if enabled.
                 if let Some(adc_left) = adc.adc_left {
                     self.modify_leftadcvolume(|reg| reg.with_ladcgain(adc_left.gain))
-                        .await
-                        .unwrap();
+                        .await?;
                 }
             }
-
-            // Register 44.
-            self.modify_inputcontrol(|reg| {
-                reg.with_rmicnrpga(false)
-                    .with_rmicnrpga(false) // disable default right differential mix in to PGA
-                    .with_lmicnlpga(false)
-                    .with_lmicnlpga(false) // disable default right differential mix in to PGA
-            })
-            .await?;
 
             // Configure the right input mixer and PGA if enabled.
             if let Some(input_mixer) = config.input_mixer_right {
@@ -548,6 +811,16 @@ where
                     // Mute left and right PGA (registers 45, 46)
                     self.modify_rightinputpgagain(|reg| reg.with_rpgamt(pga.muted))
                         .await?;
+
+                    // Register 44.
+                    //
+                    // Configure the right PGA inputs.
+                    self.modify_inputcontrol(|reg| {
+                        reg.with_rmicnrpga(pga.mic_n)
+                            .with_rmicprpga(pga.mic_p)
+                            .with_rlinrpga(pga.line_in)
+                    })
+                    .await?;
                 }
             }
 
@@ -565,6 +838,16 @@ where
                 if let Some(pga) = input_mixer.pga {
                     self.modify_leftinputpgagain(|reg| reg.with_lpgamt(pga.muted))
                         .await?;
+
+                    // Register 44.
+                    //
+                    // Configure the left PGA inputs.
+                    self.modify_inputcontrol(|reg| {
+                        reg.with_lmicnlpga(pga.mic_n)
+                            .with_lmicplpga(pga.mic_p)
+                            .with_llinlpga(pga.line_in)
+                    })
+                    .await?;
                 }
             }
         }
@@ -573,79 +856,125 @@ where
 
         // Register 3 - output power
         self.modify_powermanagement3(|reg| {
-            reg.with_auxout1en(true) // Aux out 1 (pin#21) enable
-                .with_auxout2en(true) // Aux out 2 (pin#22) enable
+            reg.with_auxout1en(config.aux1_output.is_some()) // Aux out 1 (pin#21) enable
+                .with_auxout2en(config.aux2_output.is_some()) // Aux out 2 (pin#22) enable
                 .with_lspken(false) // Left speaker output driver enable
                 .with_rspken(false) // Right speaker output driver enable
-                .with_rmixen(true) // Right output main mixer enable
-                .with_lmixen(true) // Left output main mixer enable
-                .with_rdacen(true) // Right DAC enable
-                .with_ldacen(true) // Left DAC enable
+                .with_rmixen(config.output_mixer_right.is_some()) // Right output main mixer enable
+                .with_lmixen(config.output_mixer_left.is_some()) // Left output main mixer enable
+                .with_rdacen(
+                    config
+                        .dac
+                        .as_ref()
+                        .is_some_and(|dac| dac.dac_right.is_some()),
+                ) // Right DAC enable
+                .with_ldacen(
+                    config
+                        .dac
+                        .as_ref()
+                        .is_some_and(|dac| dac.dac_left.is_some()),
+                ) // Left DAC enable
         })
         .await?;
 
-        // Register 10
-        // codec
-        //     .modify_daccontrol(|reg| {
-        //         reg.with_dacos(true) // 128x oversampling
-        //     })
-        //     .await
-        //     .unwrap();
-
-        // Register 50
-        // Set the left main mix to use the left aux input.
-        self.modify_leftmixer(|reg| {
-            reg.with_ldaclmx(true) // mix in the left dac output
-        })
-        .await?;
-
-        // Register 51
-        // Set the right main mix to use the right aux input.
-        self.modify_rightmixer(|reg| {
-            reg.with_rdacrmx(true) // mix in the right dac output
-        })
-        .await?;
-
-        // Set volumes to initial 0dB
-        self.modify_leftdacvolume(|reg| reg.with_ldacvu(false).with_ldacgain(0b11111111))
+        // Configure the left and right DACs if enabled.
+        if let Some(dac) = config.dac {
+            // Register 10
+            self.modify_daccontrol(|reg| {
+                reg.with_dacos(dac.oversample_128) // 128x oversampling
+            })
             .await?;
-        self.modify_rightdacvolume(|reg| reg.with_rdacvu(true).with_rdacgain(0b11111111))
+
+            // Configures the right DAC.
+            if let Some(dac_right) = dac.dac_right {
+                self.modify_rightdacvolume(|reg| {
+                    reg.with_rdacvu(true).with_rdacgain(dac_right.gain)
+                })
+                .await?;
+            }
+
+            // Configures the left DAC.
+            if let Some(dac_left) = dac.dac_left {
+                self.modify_leftdacvolume(|reg| {
+                    reg.with_ldacvu(false).with_ldacgain(dac_left.gain)
+                })
+                .await?;
+            }
+        }
+
+        // Configure the right output mixer.
+        if let Some(mixer) = config.output_mixer_right {
+            // Register 51
+            // Set the right main mix to use the right aux input.
+            self.modify_rightmixer(|reg| {
+                reg.with_rauxmxgain(mixer.aux_gain)
+                    .with_rauxrmx(mixer.aux_input)
+                    .with_rbypmxgain(mixer.adc_input_gain)
+                    .with_rbyprmx(mixer.adc_input)
+                    .with_rdacrmx(mixer.dac_input)
+            })
             .await?;
+        }
+
+        // Configure the left output mixer.
+        if let Some(mixer) = config.output_mixer_left {
+            // Register 50
+            // Set the left main mix to use the left aux input.
+            self.modify_leftmixer(|reg| {
+                reg.with_lauxmxgain(mixer.aux_gain)
+                    .with_lauxlmx(mixer.aux_input)
+                    .with_lbypmxgain(mixer.adc_input_gain)
+                    .with_lbyplmx(mixer.adc_input)
+                    .with_ldaclmx(mixer.dac_input)
+            })
+            .await?;
+        }
 
         // TODO: remove after testing clock!!
         // Internal ADC -> DAC Loopback
         // Test routing ADC output to DAC input
         // codec
         //     .modify_companding(|reg| reg.with_addap(true))
-        //     .await
-        //     .unwrap();
+        //     .await?;
 
-        // Connect the left output mixer to the aux1 out.
-        //
-        // AUX1 can only connect to LMIX or RMIX.
-        self.modify_aux1mixer(|reg| {
-            // reg.with_rdacaux1(true) // mix in right DAC output
-            // reg.with_rdacaux1(true).with_radcaux1(true)
-            reg.with_rdacaux1(true)
-        })
-        .await?;
+        // Configure the aux1 output mixer.
+        if let Some(aux1) = config.aux1_output {
+            // Connect the left output mixer to the aux1 out.
+            //
+            // AUX1 can only connect to LMIX or RMIX.
+            self.modify_aux1mixer(|reg| {
+                reg.with_auxout1mt(aux1.muted)
+                    .with_aux1half(aux1.attenuation_6_0db)
+                    .with_lmixaux1(aux1.left_mixer_input)
+                    .with_ldacaux1(aux1.left_dac_input)
+                    .with_radcaux1(aux1.right_adc_mixer_input)
+                    .with_rmixaux1(aux1.right_mixer_input)
+                    .with_rdacaux1(aux1.right_dac_input)
+            })
+            .await?;
+        }
 
-        // Connect the left output mixer to the aux2 out.
-        //
-        // AUX2 can only connect to LMIX but not RMIX.
-        self.modify_aux2mixer(|reg| {
-            // reg.with_ldacaux2(true) // mix in left dac output
-            // reg.with_ldacaux2(true).with_ldacaux(true)
-            reg.with_ldacaux2(true)
-        })
-        .await?;
+        // Configure the aux2 output mixer.
+        if let Some(aux2) = config.aux2_output {
+            // Connect the left output mixer to the aux2 out.
+            //
+            // AUX2 can only connect to LMIX but not RMIX.
+            self.modify_aux2mixer(|reg| {
+                reg.with_auxout2mt(aux2.muted)
+                    .with_aux1mix_2(aux2.aux1_interconnect_input)
+                    .with_ladcaux2(aux2.left_adc_mix_input)
+                    .with_lmixaux2(aux2.left_mixer_input)
+                    .with_ldacaux2(aux2.left_dac_input)
+            })
+            .await?;
+        }
 
         // Register 4
         //
         // Configure the audio format
         self.modify_audiointerface(|reg| {
-            reg.with_wlen(WordLength::Word24Bit) // 24-bit words
-                .with_aifmt(AudioInterfaceDataFormat::StandardI2S) // standard i2s
+            reg.with_wlen(config.format.word_length) // 16, 24, 32
+                .with_aifmt(config.format.data_format) // i2s, pcm, tdm
         })
         .await?;
 
@@ -660,7 +989,7 @@ where
         config: ClockConfig,
         mut delay: DELAY,
     ) -> Result<(), ClockError<I2C::Error>> {
-        // First, enable the PLL is powered down.
+        // First, ensure the PLL is powered down.
         self.modify_powermanagement1(|reg| {
             reg.with_pllen(false) // Ensure the PLL is disabled.
         })
@@ -687,7 +1016,8 @@ where
 
         // Calculate the codec master clock divisor and PLL for the
         // provided input clock frequency and desired sample rate.
-        let clock = clock::calculate_pll(config.mclk, config.sample_rate).unwrap();
+        let clock = clock::calculate_pll(config.mclk, config.sample_rate)
+            .map_err(|e| ClockError::PLLError(e))?;
 
         let mclk_div: MasterClockSourceScaling = clock
             .mclk_div

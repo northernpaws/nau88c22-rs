@@ -497,6 +497,11 @@ pub struct AudioConfig {
     /// Enables and configures the left output mixer.
     pub output_mixer_left: Option<LeftOutputMixerConfig>,
 
+    /// Enables the right speaker driver.
+    pub enable_speaker_right: bool,
+    /// Enables the left speaker driver.
+    pub enable_speaker_left: bool,
+
     /// Enables and configures the left and right ADCs.
     pub adc: Option<ADCConfig>,
 
@@ -533,6 +538,9 @@ impl AudioConfig {
 
             enable_headphone_right: false,
             enable_headphone_left: false,
+
+            enable_speaker_right: false,
+            enable_speaker_left: false,
 
             input_mixer_right: Some(InputMixerConfig {
                 pga: None, // aux inputs bypass the PGA
@@ -587,6 +595,8 @@ impl Default for AudioConfig {
             input_mixer_left: None,
             output_mixer_right: None,
             output_mixer_left: None,
+            enable_speaker_right: false,
+            enable_speaker_left: false,
             adc: None,
             dac: None,
             format: Default::default(),
@@ -891,8 +901,8 @@ where
         self.modify_powermanagement3(|reg| {
             reg.with_auxout1en(config.aux1_output.is_some()) // Aux out 1 (pin#21) enable
                 .with_auxout2en(config.aux2_output.is_some()) // Aux out 2 (pin#22) enable
-                .with_lspken(false) // Left speaker output driver enable
-                .with_rspken(false) // Right speaker output driver enable
+                .with_lspken(config.enable_speaker_left) // Left speaker output driver enable
+                .with_rspken(config.enable_speaker_right) // Right speaker output driver enable
                 .with_rmixen(config.output_mixer_right.is_some()) // Right output main mixer enable
                 .with_lmixen(config.output_mixer_left.is_some()) // Left output main mixer enable
                 .with_rdacen(
@@ -928,10 +938,8 @@ where
 
             // Configures the left DAC.
             if let Some(dac_left) = dac.dac_left {
-                self.modify_leftdacvolume(|reg| {
-                    reg.with_ldacvu(false).with_ldacgain(dac_left.gain)
-                })
-                .await?;
+                self.modify_leftdacvolume(|reg| reg.with_ldacvu(true).with_ldacgain(dac_left.gain))
+                    .await?;
             }
         }
 

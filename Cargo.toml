@@ -8,6 +8,7 @@ repository = "https://github.com/northernpaws/nau88c22-rs"
 
 [dependencies]
 embedded-hal-async = "1.0.0"
+libm = "0.2.15"
 paste = "1.0.15"
 proc-bitfield = "0.5.2"
 

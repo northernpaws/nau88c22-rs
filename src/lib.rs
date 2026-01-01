@@ -230,55 +230,55 @@ where
 /// Note that the AUX inputs bypass the PGA.
 pub struct PGAConfig {
     /// Specifies if the input PGA should be muted.
-    muted: bool,
+    pub muted: bool,
 }
 
 /// Configures the left or right ADC input mixer.
 pub struct InputMixerConfig {
     /// Optionally enables and configures the
     /// PGA associated with the input mixer.
-    pga: Option<PGAConfig>,
+    pub pga: Option<PGAConfig>,
 
     // Apply a +20dB gain boost to the PGA input.
-    pga_boost: bool,
-    pga_gain: u8, // TODO: use gain type
+    pub pga_boost: bool,
+    pub pga_gain: u8, // TODO: use gain type
 }
 
 /// Configures the left or right ADC.
 pub struct ADCChannelConfig {
     /// Gain applied the ADC input from the mix/boost stage.
-    gain: u8,
+    pub gain: u8,
 }
 
 pub struct ADCConfig {
     /// Enables x128 oversampling instead of the
     /// default x64 at a modest power increase.
-    oversample_128: bool,
+    pub oversample_128: bool,
 
     /// Enables and configures the left ADC.
-    adc_left: Option<ADCChannelConfig>,
+    pub adc_left: Option<ADCChannelConfig>,
     /// Enables and configures the right ADC.
-    adc_right: Option<ADCChannelConfig>,
+    pub adc_right: Option<ADCChannelConfig>,
 }
 
 pub struct AudioConfig {
     /// Enables the AUX1 output mixer.
-    enable_aux1_output: bool,
+    pub enable_aux1_output: bool,
 
     /// Enables the AUX2 output mixer.
-    enable_aux2_output: bool,
+    pub enable_aux2_output: bool,
 
     /// Enables the micbias power regulator.
     ///
     /// This does not apply micbias power directly
     /// to mic inputs, you must tie the micbias
     /// input as a pull-up to the desired inputs.
-    enable_micbias: bool,
+    pub enable_micbias: bool,
 
     /// Enables the right headphone driver.
-    enable_headphone_right: bool,
+    pub enable_headphone_right: bool,
     /// Enables the left headphone driver.
-    enable_headphone_left: bool,
+    pub enable_headphone_left: bool,
 
     /// Enables the right channel mix/boost input mixer that
     /// sits between the right input PGA and the right ADC.
@@ -289,7 +289,7 @@ pub struct AudioConfig {
     /// Note that we don't group the input mixer settings under
     /// the ADC settings because the input mixers can be used
     /// independently via their output mixer bypass path.
-    input_mixer_right: Option<InputMixerConfig>,
+    pub input_mixer_right: Option<InputMixerConfig>,
 
     /// Enables the left channel mix/boost input mixer that
     /// sits between the left input PGA and the left ADC.
@@ -300,19 +300,19 @@ pub struct AudioConfig {
     /// Note that we don't group the input mixer settings under
     /// the ADC settings because the input mixers can be used
     /// independently via their output mixer bypass path.
-    input_mixer_left: Option<InputMixerConfig>,
+    pub input_mixer_left: Option<InputMixerConfig>,
 
     /// Enables and configures the left and right ADC.
-    adc: Option<ADCConfig>,
+    pub adc: Option<ADCConfig>,
 }
 
 pub struct ClockConfig {
     /// The input master clock frequency
     /// in hertz applied to the MCLK pin.
-    mclk: f32,
+    pub mclk: f32,
 
     /// The desired sample rate in hertz.
-    sample_rate: f32,
+    pub sample_rate: f32,
 }
 
 /// Config for performing initialization of the audio paths and clock.
@@ -320,8 +320,10 @@ pub struct ClockConfig {
 /// Ideally should be used once when program starts, but could
 /// be called multiple times without any downsides.
 pub struct InitializationConfig {
-    audio: AudioConfig,
-    clock: ClockConfig,
+    pub audio: AudioConfig,
+
+    /// Optionally configures the codec's IMCLK PLL.
+    pub clock: Option<ClockConfig>,
 }
 
 /// Returned if there was an error configuring the clocks.
@@ -419,7 +421,9 @@ where
         self.configure_audio(config.audio).await?;
 
         // Configure the digital audio clock and internal PLL.
-        self.configure_clock(config.clock, &mut delay).await?;
+        if let Some(clock) = config.clock {
+            self.configure_pll(clock, &mut delay).await?;
+        }
 
         Ok(())
     }
@@ -631,7 +635,7 @@ where
     /// Convenince method that configures the
     /// internal MCLK and PLL based on the
     /// required sample rate and input clock.
-    pub async fn configure_clock<DELAY: DelayNs>(
+    pub async fn configure_pll<DELAY: DelayNs>(
         &mut self,
         config: ClockConfig,
         mut delay: DELAY,

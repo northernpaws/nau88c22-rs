@@ -756,7 +756,7 @@ where
 
         // Wait the recommended minimum 250ms for the caps to
         // charge to avoid popping/clicking on the outputs.
-        delay.delay_ms(350).await;
+        delay.delay_ms(500).await;
 
         // Configure the audio paths, ADC, and DAC.
         self.configure_audio(config.audio).await?;

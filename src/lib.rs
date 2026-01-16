@@ -694,12 +694,35 @@ impl<I2C> Nau88c22<I2C>
 where
     I2C: embedded_hal_async::i2c::I2c,
 {
+    pub async fn mute_all(&mut self) -> Result<(), InitError<I2C::Error>> {
+        self.modify_rightspeakersubmixer(|reg| reg.with_rauxsmut(true).with_rmixmut(true))
+            .await?;
+
+        self.modify_lhpvolume(|reg| reg.with_lhpmute(true)).await?;
+        self.modify_rhpvolume(|reg| reg.with_rhpmute(true)).await?;
+
+        self.modify_lspkoutvolume(|reg| reg.with_lspkmute(true))
+            .await?;
+        self.modify_rspkoutvolume(|reg| reg.with_rspkmute(true))
+            .await?;
+
+        self.modify_aux1mixer(|reg| reg.with_auxout1mt(true))
+            .await?;
+        self.modify_aux2mixer(|reg| reg.with_auxout2mt(true))
+            .await?;
+
+        Ok(())
+    }
+
     /// Convenince methods that performs the manufacture recommended initialization sequence.
     pub async fn initialize<DELAY: DelayNs>(
         &mut self,
         config: InitializationConfig,
         mut delay: DELAY,
     ) -> Result<(), InitError<I2C::Error>> {
+        // Mute all outputs to help prevent popping.
+        self.mute_all().await?;
+
         // Software reset the codec to a known state.
         self.reset().await?; // register 0
 
@@ -714,19 +737,26 @@ where
             }
         }
 
+        // Configure the boost for 3.3v "low-power" operation.
+        self.modify_outputcontrol(|reg| {
+            reg.with_spkbst(false)
+                .with_aux1bst(false)
+                .with_aux2bst(false)
+        })
+        .await?;
+
         // First enable the aux mixers,internal tie-off, and slow-charge impedance.
         self.modify_powermanagement1(|reg| {
             reg.with_dcbufen(false) // false for lower then 3.6v operation
-                .with_pllen(false) // Ensure the PLL is disabled.
                 .with_abiasen(true) // Enable internal Analog Bias Buffer.
                 .with_iobufen(true) // Internal Tie-off Buffer In Non-boost 1.0X Mode
                 .with_refimp(0b01) // VREF Impedance Select - 80k
         })
         .await?;
 
-        // Wait the recommended 250ms for the caps to charge
-        // to avoid popping/clicking on the outputs.
-        delay.delay_ms(250).await;
+        // Wait the recommended minimum 250ms for the caps to
+        // charge to avoid popping/clicking on the outputs.
+        delay.delay_ms(350).await;
 
         // Configure the audio paths, ADC, and DAC.
         self.configure_audio(config.audio).await?;

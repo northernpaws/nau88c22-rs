@@ -750,7 +750,7 @@ where
             reg.with_dcbufen(false) // false for lower then 3.6v operation
                 .with_abiasen(true) // Enable internal Analog Bias Buffer.
                 .with_iobufen(true) // Internal Tie-off Buffer In Non-boost 1.0X Mode
-                .with_refimp(0b01) // VREF Impedance Select - 80k
+                .with_refimp(0b10) // VREF Impedance Select - 80k
         })
         .await?;
 

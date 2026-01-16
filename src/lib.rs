@@ -720,9 +720,6 @@ where
         config: InitializationConfig,
         mut delay: DELAY,
     ) -> Result<(), InitError<I2C::Error>> {
-        // Mute all outputs to help prevent popping.
-        self.mute_all().await?;
-
         // Software reset the codec to a known state.
         self.reset().await?; // register 0
 
@@ -736,6 +733,9 @@ where
                 break;
             }
         }
+
+        // Mute all outputs to help prevent popping.
+        self.mute_all().await?;
 
         // Configure the boost for 3.3v "low-power" operation.
         self.modify_outputcontrol(|reg| {

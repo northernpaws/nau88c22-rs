@@ -971,15 +971,17 @@ where
             // Configures the right DAC.
             if let Some(dac_right) = dac.dac_right {
                 self.modify_rightdacvolume(|reg| {
-                    reg.with_rdacvu(true).with_rdacgain(dac_right.gain)
+                    reg.with_rdacvu(false).with_rdacgain(dac_right.gain)
                 })
                 .await?;
             }
 
             // Configures the left DAC.
             if let Some(dac_left) = dac.dac_left {
-                self.modify_leftdacvolume(|reg| reg.with_ldacvu(true).with_ldacgain(dac_left.gain))
-                    .await?;
+                self.modify_leftdacvolume(|reg| {
+                    reg.with_ldacvu(false).with_ldacgain(dac_left.gain)
+                })
+                .await?;
             }
         }
 

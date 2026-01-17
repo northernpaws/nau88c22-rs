@@ -950,6 +950,16 @@ where
         })
         .await?;
 
+        if config.enable_speaker_left {
+            self.modify_lspkoutvolume(|reg| reg.with_lspkmute(false))
+                .await?;
+        }
+
+        if config.enable_speaker_right {
+            self.modify_rspkoutvolume(|reg| reg.with_rspkmute(false))
+                .await?;
+        }
+
         // Configure the left and right DACs if enabled.
         if let Some(dac) = config.dac {
             // Register 10
